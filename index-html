@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="fa" dir="rtl" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ماموریت اعشاری - بازی آموزشی ریاضی</title>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Tahoma', 'Arial', 'Vazir', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      direction: rtl;
+      overflow: auto;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      min-height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 950px;
+      background: white;
+      border-radius: 30px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fadeInUp 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .start-screen {
+      text-align: center;
+    }
+
+    .game-logo {
+      font-size: 80px;
+      margin-bottom: 10px;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 10px 20px rgba(102, 126, 234, 0.4));
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-25px) rotate(5deg);
+      }
+    }
+
+    .game-title {
+      font-size: 48px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 10px 0 25px 0;
+      font-weight: 900;
+      text-shadow: 0 2px 10px rgba(118, 75, 162, 0.2);
+    }
+
+    .story-box {
+      background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      padding: 30px;
+      border-radius: 25px;
+      margin: 35px 0;
+      line-height: 2.2;
+      font-size: 19px;
+      color: #2d3748;
+      box-shadow: 0 10px 30px rgba(142, 197, 252, 0.3);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .astronaut {
+      font-size: 100px;
+      margin: 25px 0;
+      animation: float 3s ease-in-out infinite;
+      filter: drop-shadow(0 10px 20px rgba(102, 126, 234, 0.3));
+    }
+
+    .btn {
+      padding: 20px 50px;
+      border: none;
+      border-radius: 20px;
+      font-size: 22px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      font-family: 'Tahoma', 'Arial', sans-serif;
+      margin: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      text-transform: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-option {
+      background: white;
+      color: #2d3748;
+      border: 4px solid #e2e8f0;
+      width: 100%;
+      text-align: right;
+      padding: 18px 25px;
+      margin: 12px 0;
+      font-size: 19px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      border-radius: 18px;
+    }
+
+    .btn-option:hover {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-color: #667eea;
+      transform: translateX(-5px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-option.selected {
+      background: linear-gradient(135deg, #e0c3fc 0%, #d4bbfc 100%);
+      border-color: #764ba2;
+      transform: translateX(-8px);
+      box-shadow: 0 10px 25px rgba(118, 75, 162, 0.3);
+    }
+
+    .btn-option.correct {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      border-color: #10b981;
+      animation: correctPulse 0.6s ease;
+    }
+
+    @keyframes correctPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .btn-option.incorrect {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border-color: #ef4444;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(16, 185, 129, 0.5);
+    }
+
+    .progress-container {
+      margin: 25px 0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-weight: 900;
+      color: #4a5568;
+      font-size: 17px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 35px;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      border-radius: 20px;
+      transition: width 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 2px 10px rgba(118, 75, 162, 0.5);
+    }
+
+    .stars-display {
+      text-align: center;
+      margin: 25px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #2d3748;
+      padding: 15px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(254, 243, 199, 0.5);
+    }
+
+    .star {
+      font-size: 35px;
+      margin: 0 3px;
+      display: inline-block;
+      animation: starPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      filter: drop-shadow(0 3px 8px rgba(245, 158, 11, 0.4));
+    }
+
+    @keyframes starPop {
+      0% {
+        transform: scale(0) rotate(0deg);
+      }
+      50% {
+        transform: scale(1.4) rotate(180deg);
+      }
+      100% {
+        transform: scale(1) rotate(360deg);
+      }
+    }
+
+    .level-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .level-number {
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: 700;
+      opacity: 0.95;
+    }
+
+    .level-title {
+      font-size: 32px;
+      font-weight: 900;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .mission-box {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      padding: 25px;
+      border-radius: 20px;
+      margin: 25px 0;
+      border-right: 6px solid #667eea;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .mission-icon {
+      font-size: 50px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 5px 10px rgba(102, 126, 234, 0.3));
+    }
+
+    .mission-text {
+      font-size: 19px;
+      line-height: 2;
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    .question-box {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 4px solid #e0c3fc;
+      margin: 25px 0;
+      box-shadow: 0 10px 30px rgba(224, 195, 252, 0.3);
+    }
+
+    .question-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: #2d3748;
+      margin-bottom: 25px;
+      line-height: 1.8;
+    }
+
+    .options-container {
+      margin: 20px 0;
+    }
+
+    .feedback-box {
+      padding: 25px;
+      border-radius: 20px;
+      margin: 25px 0;
+      font-size: 20px;
+      font-weight: 800;
+      text-align: center;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .feedback-box.show {
+      display: block;
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .feedback-box.correct {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+      border: 4px solid #10b981;
+    }
+
+    .feedback-box.incorrect {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+      border: 4px solid #ef4444;
+    }
+
+    .feedback-icon {
+      font-size: 50px;
+      margin-bottom: 12px;
+      animation: blink 1s ease infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .end-screen {
+      text-align: center;
+    }
+
+    .congrats-icon {
+      font-size: 120px;
+      margin: 25px 0;
+      animation: celebrate 1s ease infinite;
+      filter: drop-shadow(0 10px 30px rgba(245, 158, 11, 0.5));
+    }
+
+    @keyframes celebrate {
+      0%, 100% {
+        transform: rotate(-10deg) scale(1);
+      }
+      50% {
+        transform: rotate(10deg) scale(1.1);
+      }
+    }
+
+    .congrats-title {
+      font-size: 48px;
+      background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 25px 0;
+      font-weight: 900;
+    }
+
+    .final-stars {
+      font-size: 70px;
+      margin: 35px 0;
+      filter: drop-shadow(0 5px 15px rgba(245, 158, 11, 0.5));
+    }
+
+    .score-display {
+      font-size: 36px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 900;
+      margin: 25px 0;
+      line-height: 1.6;
+    }
+
+    .motivational-message {
+      font-size: 21px;
+      color: #2d3748;
+      line-height: 2;
+      margin: 25px 0;
+      padding: 25px;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 20px;
+      font-weight: 600;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .score-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .score-item {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 18px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      border: 3px solid #e2e8f0;
+    }
+
+    .score-number {
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .score-label {
+      font-size: 16px;
+      color: #718096;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 25px;
+      }
+
+      .game-title {
+        font-size: 36px;
+      }
+
+      .congrats-title {
+        font-size: 36px;
+      }
+
+      .btn {
+        padding: 16px 35px;
+        font-size: 19px;
+      }
+
+      .question-text {
+        font-size: 19px;
+      }
+
+      .btn-option {
+        font-size: 17px;
+        padding: 15px 20px;
+      }
+
+      .score-breakdown {
+        gap: 15px;
+      }
+
+      .score-item {
+        padding: 15px 20px;
+      }
+
+      .score-number {
+        font-size: 32px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .game-container {
+        padding: 20px;
+      }
+
+      .game-logo {
+        font-size: 60px;
+      }
+
+      .game-title {
+        font-size: 28px;
+      }
+
+      .astronaut {
+        font-size: 70px;
+      }
+
+      .story-box {
+        font-size: 16px;
+        padding: 20px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="game-wrapper">
+   <div class="game-container">
+    <div class="screen active" id="start-screen">
+     <div class="game-logo">
+      🚀
+     </div>
+     <h1 class="game-title">ماموریت اعشاری</h1>
+     <div class="astronaut">
+      👨‍🚀
+     </div>
+     <div class="story-box">
+      سلام فضانورد کوچولو! 🌟 <br><br>
+       تو به سیاره اعشار سفر کرده‌ای! برای کشف این سیاره جادویی، باید 4 ماموریت مهم را انجام بدهی. <br><br>
+       در هر ماموریت، مسائل اعشاری رو حل کن و ستاره‌ها رو جمع کن! <br><br>
+       آماده‌ای؟ 🎯
+     </div><button class="btn btn-primary" id="start-btn">🚀 شروع ماموریت</button>
+    </div>
+    <div class="screen" id="level-screen">
+     <div class="progress-container">
+      <div class="progress-label"><span>پیشرفت ماموریت</span> <span id="progress-text">مرحله 1 از 4</span>
+      </div>
+      <div class="progress-bar">
+       <div class="progress-fill" id="progress-fill" style="width: 25%;">
+        25%
+       </div>
+      </div>
+     </div>
+     <div class="stars-display"><span>ستاره‌های جمع شده: </span> <span id="stars-collected">⭐⭐⭐</span>
+     </div>
+     <div class="level-header">
+      <div class="level-number" id="level-number">
+       مرحله 1
+      </div>
+      <div class="level-title" id="level-title">
+       جمع و تفریق اعشاری
+      </div>
+     </div>
+     <div class="mission-box">
+      <div class="mission-icon">
+       🎯
+      </div>
+      <div class="mission-text" id="mission-text"></div>
+     </div>
+     <div class="question-box">
+      <div class="question-text" id="question-text"></div>
+      <div class="options-container" id="options-container"></div>
+     </div>
+     <div class="feedback-box" id="feedback-box">
+      <div class="feedback-icon" id="feedback-icon"></div>
+      <div id="feedback-text"></div>
+     </div>
+     <div style="text-align: center;"><button class="btn btn-primary" id="check-btn">✓ بررسی پاسخ</button> <button class="btn btn-success" id="next-btn" style="display: none;">ادامه ماموریت →</button>
+     </div>
+    </div>
+    <div class="screen" id="end-screen">
+     <div class="congrats-icon">
+      🎉
+     </div>
+     <h1 class="congrats-title">تبریک فضانورد!</h1>
+     <div class="final-stars" id="final-stars"></div>
+     <div class="score-breakdown">
+      <div class="score-item">
+       <div class="score-number" id="correct-count">
+        0
+       </div>
+       <div class="score-label">
+        پاسخ صحیح
+       </div>
+      </div>
+      <div class="score-item">
+       <div class="score-number" id="total-questions">
+        4
+       </div>
+       <div class="score-label">
+        کل سوالات
+       </div>
+      </div>
+      <div class="score-item">
+       <div class="score-number" id="score-percentage">
+        0%
+       </div>
+       <div class="score-label">
+        درصد موفقیت
+       </div>
+      </div>
+     </div>
+     <div class="score-display" id="performance-text">
+      عالی! تو همه ماموریت‌ها رو با موفقیت انجام دادی!
+     </div>
+     <div class="motivational-message" id="motivational-text">
+      👏 آفرین! تو حالا یک استاد اعداد اعشاری هستی! <br><br>
+       با این مهارت‌ها می‌تونی هر محاسبه‌ای رو انجام بدی. <br><br>
+       🌟 به سیاره‌های دیگر هم سفر کن!
+     </div><button class="btn btn-primary" id="restart-btn">🔄 بازی دوباره</button>
+    </div>
+   </div>
+  </div>
+  <script>
+    const levels = [
+      {
+        number: 1,
+        title: "جمع و تفریق اعشاری",
+        icon: "🛸",
+        mission: "🛸 سفینه فضایی تو به سوخت نیاز داره! باید مقدار سوخت رو محاسبه کنی.",
+        questions: [
+          {
+            text: "اگر مخزن اول 3.5 لیتر و مخزن دوم 2.8 لیتر سوخت داشته باشه، در مجموع چند لیتر سوخت داری؟",
+            options: ["5.3 لیتر", "6.3 لیتر", "6.2 لیتر", "5.8 لیتر"],
+            correct: 1
+          },
+          {
+            text: "سفینه 8.7 لیتر سوخت داره. اگر 3.2 لیتر مصرف بشه، چند لیتر باقی می‌مونه؟",
+            options: ["5.5 لیتر", "5.9 لیتر", "4.5 لیتر", "6.5 لیتر"],
+            correct: 0
+          },
+          {
+            text: "مخزن سوخت 6.4 لیتر داره. اگر 1.9 لیتر اضافه کنی، در مجموع چند لیتر می‌شه؟",
+            options: ["7.3 لیتر", "8.3 لیتر", "8.2 لیتر", "7.9 لیتر"],
+            correct: 1
+          },
+          {
+            text: "تو 9.6 لیتر آب داری. اگر 4.8 لیتر استفاده کنی، چقدر باقی می‌مونه؟",
+            options: ["4.8 لیتر", "5.8 لیتر", "4.2 لیتر", "5.2 لیتر"],
+            correct: 0
+          },
+          {
+            text: "دو تانکر سوخت داری: یکی 5.3 لیتر و دیگری 7.9 لیتر. در مجموع چند لیتر سوخت داری؟",
+            options: ["12.2 لیتر", "13.2 لیتر", "13.1 لیتر", "12.9 لیتر"],
+            correct: 1
+          }
+        ]
+      },
+      {
+        number: 2,
+        title: "ضرب اعشاری در عدد طبیعی",
+        icon: "💎",
+        mission: "💎 باید سنگ‌های قیمتی سیاره رو جمع کنی! هر سنگ وزن خاصی داره.",
+        questions: [
+          {
+            text: "اگر هر سنگ قیمتی 1.5 کیلوگرم وزن داشته باشه و تو 4 تا سنگ پیدا کنی، در مجموع چند کیلو سنگ داری؟",
+            options: ["5 کیلو", "6 کیلو", "6.5 کیلو", "5.5 کیلو"],
+            correct: 1
+          },
+          {
+            text: "هر جعبه ابزار 2.3 کیلو وزن داره. اگر 5 تا جعبه داشته باشی، در مجموع چند کیلو می‌شه؟",
+            options: ["11.5 کیلو", "10.5 کیلو", "12.5 کیلو", "11 کیلو"],
+            correct: 0
+          },
+          {
+            text: "هر بطری آب 0.75 لیتره. اگر 6 تا بطری بخری، در مجموع چند لیتر آب داری؟",
+            options: ["4 لیتر", "4.5 لیتر", "5 لیتر", "5.5 لیتر"],
+            correct: 1
+          },
+          {
+            text: "قیمت هر کتاب 3.2 تومان است. اگر 3 تا کتاب بخری، چقدر باید بدی؟",
+            options: ["9.6 تومان", "9.2 تومان", "10.6 تومان", "8.6 تومان"],
+            correct: 0
+          },
+          {
+            text: "هر کیسه برنج 4.5 کیلو وزن داره. وزن 7 کیسه چقدر می‌شه؟",
+            options: ["30.5 کیلو", "31.5 کیلو", "32.5 کیلو", "29.5 کیلو"],
+            correct: 1
+          }
+        ]
+      },
+      {
+        number: 3,
+        title: "تقسیم اعشاری",
+        icon: "🍕",
+        mission: "🍕 غذای فضایی رو باید بین اعضای تیم تقسیم کنی!",
+        questions: [
+          {
+            text: "اگر 7.5 کیلوگرم غذا داشته باشی و بخوای بین 3 نفر مساوی تقسیم کنی، هر نفر چند کیلو غذا می‌گیره؟",
+            options: ["2 کیلو", "2.5 کیلو", "3 کیلو", "2.3 کیلو"],
+            correct: 1
+          },
+          {
+            text: "9.6 متر طناب داری و می‌خوای به 4 قسمت مساوی تقسیم کنی. هر قسمت چند متر می‌شه؟",
+            options: ["2.2 متر", "2.4 متر", "2.6 متر", "2.8 متر"],
+            correct: 1
+          },
+          {
+            text: "اگر 12.8 لیتر شیر رو بین 4 کودک تقسیم کنی، هر کودک چند لیتر می‌گیره؟",
+            options: ["3.2 لیتر", "3 لیتر", "3.4 لیتر", "2.8 لیتر"],
+            correct: 0
+          },
+          {
+            text: "15.5 کیلو میوه رو می‌خوای بین 5 سبد تقسیم کنی. هر سبد چند کیلو می‌شه؟",
+            options: ["3.1 کیلو", "3 کیلو", "3.5 کیلو", "2.5 کیلو"],
+            correct: 0
+          },
+          {
+            text: "اگر 18.9 متر پارچه رو بخوای به 3 قسمت مساوی تقسیم کنی، هر قسمت چند متر می‌شه؟",
+            options: ["6.1 متر", "6.3 متر", "6.5 متر", "6 متر"],
+            correct: 1
+          }
+        ]
+      },
+      {
+        number: 4,
+        title: "مرحله نهایی ترکیبی",
+        icon: "🏆",
+        mission: "🏆 مرحله آخر! برای بازگشت به زمین باید یک محاسبه پیچیده انجام بدی!",
+        questions: [
+          {
+            text: "سفینه تو 12.6 لیتر سوخت داره. اگر 3.4 لیتر مصرف کنی و بعد 2.5 لیتر دیگه اضافه کنی، چند لیتر سوخت می‌مونه؟",
+            options: ["11.7 لیتر", "12.7 لیتر", "10.7 لیتر", "13.7 لیتر"],
+            correct: 0
+          },
+          {
+            text: "تو 8.4 کیلو سنگ داری. اگر 3 تا سنگ دیگه پیدا کنی که هر کدوم 1.2 کیلو وزن داشته باشن، در مجموع چند کیلو سنگ داری؟",
+            options: ["12 کیلو", "11 کیلو", "12.6 کیلو", "11.6 کیلو"],
+            correct: 0
+          },
+          {
+            text: "16.8 لیتر آب داری که می‌خوای بین 4 نفر تقسیم کنی. بعد هر نفر 1.5 لیتر مصرف می‌کنه. هر نفر چقدر آب باقی می‌مونه؟",
+            options: ["2.5 لیتر", "2.7 لیتر", "2.9 لیتر", "3 لیتر"],
+            correct: 2
+          },
+          {
+            text: "قیمت هر کیلو میوه 2.5 تومان است. اگر 6 کیلو بخری و 5 تومان تخفیف بگیری، چقدر باید بدی؟",
+            options: ["10 تومان", "15 تومان", "12 تومان", "8 تومان"],
+            correct: 0
+          },
+          {
+            text: "تو 20.4 متر طناب داری. اگر به 3 قسمت تقسیم کنی و بعد 2.3 متر از هر قسمت استفاده کنی، از هر قسمت چقدر باقی می‌مونه؟",
+            options: ["4.5 متر", "4.8 متر", "5.5 متر", "5 متر"],
+            correct: 0
+          }
+        ]
+      }
+    ];
+
+    let currentLevel = 0;
+    let selectedOption = null;
+    let totalStars = 0;
+    let usedQuestions = [];
+    let currentQuestionIndex = 0;
+    const totalQuestions = 4;
+
+    const messages = {
+      correct: "آفرین! پاسخت درسته! 🎉",
+      incorrect: "اشکالی نداره! دوباره فکر کن! 💪",
+      selectOption: "لطفاً یک گزینه را انتخاب کن!"
+    };
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function updateProgress() {
+      const progress = ((currentLevel + 1) / levels.length) * 100;
+      document.getElementById('progress-fill').style.width = progress + '%';
+      document.getElementById('progress-fill').textContent = Math.round(progress) + '%';
+      document.getElementById('progress-text').textContent = 'مرحله ' + (currentLevel + 1) + ' از ' + levels.length;
+    }
+
+    function updateStars() {
+      const starsHTML = '⭐'.repeat(totalStars);
+      document.getElementById('stars-collected').textContent = starsHTML || 'هنوز ستاره‌ای نداری!';
+    }
+
+    function loadLevel() {
+      const level = levels[currentLevel];
+      
+      if (!usedQuestions[currentLevel]) {
+        usedQuestions[currentLevel] = [];
+      }
+      
+      if (usedQuestions[currentLevel].length >= level.questions.length) {
+        usedQuestions[currentLevel] = [];
+      }
+      
+      let availableQuestions = [];
+      level.questions.forEach(function(q, index) {
+        if (!usedQuestions[currentLevel].includes(index)) {
+          availableQuestions.push(index);
+        }
+      });
+      
+      currentQuestionIndex = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+      usedQuestions[currentLevel].push(currentQuestionIndex);
+      
+      const question = level.questions[currentQuestionIndex];
+
+      document.getElementById('level-number').textContent = level.icon + ' مرحله ' + level.number;
+      document.getElementById('level-title').textContent = level.title;
+      document.getElementById('mission-text').textContent = level.mission;
+      document.getElementById('question-text').textContent = question.text;
+
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      question.options.forEach(function(option, index) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.textContent = option;
+        btn.onclick = function() { selectOption(index); };
+        optionsContainer.appendChild(btn);
+      });
+
+      document.getElementById('feedback-box').classList.remove('show');
+      document.getElementById('check-btn').style.display = 'inline-block';
+      document.getElementById('next-btn').style.display = 'none';
+      selectedOption = null;
+
+      updateProgress();
+      updateStars();
+    }
+
+    function selectOption(index) {
+      selectedOption = index;
+      const options = document.querySelectorAll('.btn-option');
+      options.forEach(function(btn, i) {
+        btn.classList.remove('selected');
+        if (i === index) {
+          btn.classList.add('selected');
+        }
+      });
+    }
+
+    function checkAnswer() {
+      if (selectedOption === null) {
+        const feedbackBox = document.getElementById('feedback-box');
+        feedbackBox.className = 'feedback-box incorrect show';
+        feedbackBox.innerHTML = '<div class="feedback-icon">⚠️</div><div>' + messages.selectOption + '</div>';
+        return;
+      }
+
+      const level = levels[currentLevel];
+      const question = level.questions[currentQuestionIndex];
+      const feedbackBox = document.getElementById('feedback-box');
+      const options = document.querySelectorAll('.btn-option');
+
+      if (selectedOption === question.correct) {
+        totalStars++;
+        feedbackBox.className = 'feedback-box correct show';
+        feedbackBox.innerHTML = '<div class="feedback-icon">✅</div><div>' + messages.correct + '</div>';
+        options[selectedOption].classList.add('correct');
+        
+        document.getElementById('check-btn').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'inline-block';
+        updateStars();
+      } else {
+        feedbackBox.className = 'feedback-box incorrect show';
+        feedbackBox.innerHTML = '<div class="feedback-icon">❌</div><div>' + messages.incorrect + '</div>';
+        options[selectedOption].classList.add('incorrect');
+        
+        setTimeout(function() {
+          options[selectedOption].classList.remove('incorrect', 'selected');
+          feedbackBox.classList.remove('show');
+          selectedOption = null;
+        }, 2000);
+      }
+    }
+
+    function nextLevel() {
+      if (currentLevel < levels.length - 1) {
+        currentLevel++;
+        loadLevel();
+      } else {
+        showEndScreen();
+      }
+    }
+
+    function showEndScreen() {
+      const finalStarsHTML = '⭐'.repeat(totalStars);
+      document.getElementById('final-stars').textContent = finalStarsHTML;
+      
+      document.getElementById('correct-count').textContent = totalStars;
+      document.getElementById('total-questions').textContent = totalQuestions;
+      
+      const percentage = Math.round((totalStars / totalQuestions) * 100);
+      document.getElementById('score-percentage').textContent = percentage + '%';
+      
+      let performanceText = '';
+      let motivationalText = '';
+      
+      if (percentage === 100) {
+        performanceText = '🏆 عالی! تو یک قهرمان واقعی هستی!';
+        motivationalText = '👏 آفرین! تو همه سوالات رو درست جواب دادی! یک استاد اعشاری شدی! 🌟 ادامه بده و به سیاره‌های دیگر هم سفر کن!';
+      } else if (percentage >= 75) {
+        performanceText = '🌟 خیلی خوب! عملکردت فوق‌العاده بود!';
+        motivationalText = '💪 خیلی خوب! تو بیشتر سوالات رو درست جواب دادی! با تمرین بیشتر، می‌تونی کامل بشی! 🚀';
+      } else if (percentage >= 50) {
+        performanceText = '👍 خوب بود! داری پیشرفت می‌کنی!';
+        motivationalText = '📚 خوب بود! با تمرین بیشتر، می‌تونی بهتر بشی! یک بار دیگه امتحان کن! 💫';
+      } else {
+        performanceText = '💪 نگران نباش! دفعه بعد بهتر می‌شی!';
+        motivationalText = '🌱 یادگیری یه مسیره! هر سوالی که غلط می‌زنی، یک درس جدید می‌گیری! دوباره تلاش کن! 🎯';
+      }
+      
+      document.getElementById('performance-text').textContent = performanceText;
+      document.getElementById('motivational-text').innerHTML = motivationalText;
+      
+      showScreen('end-screen');
+    }
+
+    function restartGame() {
+      currentLevel = 0;
+      totalStars = 0;
+      selectedOption = null;
+      usedQuestions = [];
+      currentQuestionIndex = 0;
+      showScreen('start-screen');
+    }
+
+    document.getElementById('start-btn').addEventListener('click', function() {
+      showScreen('level-screen');
+      loadLevel();
+    });
+
+    document.getElementById('check-btn').addEventListener('click', checkAnswer);
+    document.getElementById('next-btn').addEventListener('click', nextLevel);
+    document.getElementById('restart-btn').addEventListener('click', restartGame);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9af779301148afa0',t:'MTc2NTk4NTU0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
